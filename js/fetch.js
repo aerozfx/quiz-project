@@ -1,34 +1,51 @@
 let pokeArray = [];
+const POKE_ENDPOINT = `https://pokeapi.co/api/v2/pokemon-form/`;
+export const MAX_QUESTIONS = 2;
 
-const fillPokeArray = (arr) => {
-  for (let i = 0; i < 10; i++) {
-    let num = Math.floor(Math.random() * 1000);
-    arr.push(`https://pokeapi.co/api/v2/pokemon/${num}`);
+// Rellenamos el array de ENDPOINTS de los cuales obtenemos, las imágenes y los nombres de las posibles respuestas
+const fillPokeArrays = (arr) => {
+  for (let i = 0; i < MAX_QUESTIONS; i++) {
+    let pokeName = [];
+    let num = Math.ceil(Math.random() * 1000);
+    if (num === 0) {
+      num++;
+    }
+    pokeName.push(POKE_ENDPOINT + num);
+    for (let j = 0; j < 3; j++) {
+      let num = Math.floor(Math.random() * 1000);
+      pokeName.push(POKE_ENDPOINT + num);
+    }
+    arr.push(pokeName);
   }
 };
-const getPokemons = (arr) => {
-  // Creamos un array de promesas
-  let promises = arr.map((item) => {
-    return fetch(`${item}`)
-      .then((res) => res.json())
-      .then((data) => {
-        let { name, sprites: image } = data;
-        return { name, image };
-      });
-  });
-  return Promise.all(promises).then((data) => {
-    let answers = data.map((item) => {
-      let { front_default: pokeImagen } = item.image;
-      let pokemon = {};
-      pokemon["name"] = item.name;
-      pokemon["image"] = pokeImagen;
-      return pokemon;
+const getPokemons = async (arr) => {
+  // Este array obtiene los nombres e imágenes de los POKEMON correctos
+  let promises = arr.map(async (item) => {
+    // ARRAY DE PROMESAS POR CADA ITEM DE POKEARRAY
+    return item.map(async (poke) => {
+      const result = await fetch(poke);
+      const response = await result.json();
+      let { name, sprites: image } = response;
+      return { name, image };
     });
-    return answers;
   });
+  const fetchedData = await Promise.all(promises);
+  let answers = fetchedData.map((item) => {
+    // Cada ítem es un array de 4 promesas
+    return item.map((ele) => {
+      // Resolvemos cada promesa
+      return ele.then((poke) => {
+        let pokemon = {};
+        let { name, image: images } = poke;
+        let { front_default: img } = images;
+        pokemon["image"] = img;
+        pokemon["name"] = name;
+        return pokemon;
+      });
+    });
+  });
+  return answers;
 };
-fillPokeArray(pokeArray);
-let serverResponse = getPokemons(pokeArray).then((data) => {
-  let input;
-  console.log(data);
-});
+
+fillPokeArrays(pokeArray);
+export const serverResponse = getPokemons(pokeArray);
