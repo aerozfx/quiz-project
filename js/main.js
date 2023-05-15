@@ -6,10 +6,10 @@ startButton.addEventListener("click", () => {
   const preLoadSection = document.querySelector(".pre-load");
   preLoadSection.classList.toggle("hide");
 });
-
+// SELECTOR DEL FORMULARIO
 const formSelector = document.querySelector(".main-container form");
 
-// CREAMOS TANTOS SECTION CON LA CLASE QUESTION-CONTAINER COMO NÚMERO DE PREGUNTAS HAYA
+// CREAMOS TANTOS SECTION CON LA CLASE QUESTION COMO NÚMERO DE PREGUNTAS HAYA
 const createMaxNumQuestions = (numQuestions) => {
   for (let i = 0; i < numQuestions; i++) {
     const questionContainer = document.createElement("section");
@@ -38,22 +38,33 @@ const createQuestion = (data, index) => {
 
 // CREA LA ESTRUCTURA HTML DE LAS POBIBLES RESPUESTAS EN FUNCIÓN A LA IMAGEN
 // ESCOGIDA DE MANERA ALEATORIA EN PROCESSQUESTION
-const createAnswers = (data, idx, i) => {
+const createAnswers = (data, i) => {
   const section = document.querySelectorAll(".answers");
   const article = document.createElement("article");
   article.className = "answer-article";
-  article.innerHTML = `
+  article.innerHTML = ` 
+  <a href="#pregunta-${i + 1}">
   <input
   class="radio"
   type="radio"
   value="${data.name}"
-  name="pregunta"
-  id="respuesta${i}"
+  name="question-${i}"
+  id="${data.name}"
   />
-  <label class="answer-label" for="respuesta${idx}">
-  ${data.name}
-  </label>`;
+  
+    <label class="answer-label" for="${data.name}">
+    ${data.name}
+    </label>
+  </a>`;
   section[i].appendChild(article);
+};
+
+const createSubmitButton = () => {
+  const button = document.createElement("button");
+  button.type = "submit";
+  button.className = "button-submit";
+  button.innerHTML = "ENVIAR";
+  formSelector.appendChild(button);
 };
 
 const processQuestion = async (item, i) => {
@@ -62,15 +73,56 @@ const processQuestion = async (item, i) => {
   const questionData = await item[num];
   createQuestion(questionData, i);
   // CREA 4 POSIBLES RESPUESTAS CON LOS VALORES DE LA POSICIÓN ACTUAL (ITEM) DEL ARRAY DE PROMESAS
-  const answerPromises = item.map((poke, index) =>
-    poke.then((res) => createAnswers(res, index, i))
+  const answerPromises = item.map((poke) =>
+    poke.then((res) => createAnswers(res, i))
   );
   await Promise.all(answerPromises);
 };
 
+const getAnswers = () => {
+  const images = document.querySelectorAll(".question-image");
+  let anwers = [];
+  images.forEach((img) => {
+    anwers.push(img.alt);
+  });
+  return anwers;
+};
+
+const getInputsByUser = () => {
+  const inputs = document.querySelectorAll('input[type="radio"]');
+  let inputsArr = [];
+  inputs.forEach((item) => {
+    if (item.checked) {
+      inputsArr.push(item.value);
+    }
+  });
+  return inputsArr;
+};
+
+const checkAnswers = (arr1, arr2) => {
+  return arr1.filter((item, index) => item === arr2[index]).length;
+};
+
+const showResults = (num) => {
+  const darkBG = document.createElement("div");
+  darkBG.classList.toggle("modal");
+  darkBG.style.top = `${window.scrollY}px`;
+  document.querySelector(".main-container").appendChild(darkBG);
+};
+
 // CREA UNA PREGUNTA POR ARRAY DE 4 PROMESAS -> LA LONGITUD DEL ARRAY DEPENDERÁ DE LAS PREGUNTAS MÁXIMAS CONFIGURADAS
+// ADEMÁS CREAMOS EL BOTON DE SUBMIT DESPUÉS DE CREAR LAS PREGUNTAS
 serverResponse.then(async (data) => {
   for (let i = 0; i < data.length; i++) {
     await processQuestion(data[i], i);
   }
+  createSubmitButton();
+  const submitButton = document.querySelector(".button-submit");
+
+  submitButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    const anserws = getAnswers();
+    const userInputs = getInputsByUser();
+    showResults(checkAnswers(anserws, userInputs));
+  });
 });
