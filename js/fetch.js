@@ -1,6 +1,6 @@
 let pokeArray = [];
 const POKE_ENDPOINT = `https://pokeapi.co/api/v2/pokemon-form/`;
-export const MAX_QUESTIONS = 2;
+export const MAX_QUESTIONS = 5;
 
 // Rellenamos el array de ENDPOINTS de los cuales obtenemos, las imágenes y los nombres de las posibles respuestas
 const fillPokeArrays = (arr) => {
@@ -30,7 +30,7 @@ const getPokemons = async (arr) => {
     });
   });
   const fetchedData = await Promise.all(promises);
-  let answers = fetchedData.map((item) => {
+  return fetchedData.map((item) => {
     // Cada ítem es un array de 4 promesas
     return item.map((ele) => {
       // Resolvemos cada promesa
@@ -44,8 +44,6 @@ const getPokemons = async (arr) => {
       });
     });
   });
-  return answers;
 };
-
 fillPokeArrays(pokeArray);
 export const serverResponse = getPokemons(pokeArray);
