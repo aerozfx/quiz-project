@@ -5,17 +5,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/style.css" />
-    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.9.3/tsparticles.confetti.bundle.min.js"></script>
+    <title>POKEQUIZ</title>
   </head>
   <body>
     <script src="js/fetch.js" type="module"></script>
     <section class="pre-load">
-      <img class="image-start" src="/assets/images/start-image.png" alt="" />
+      <img
+        class="image-start"
+        src="/assets/images/start-image.png"
+        alt="Logo POKEQUIZ"
+      />
       <button class="button-start">START</button>
+      <audio id="audio" controls autoplay>
+        <source type="audio/wav" src="assets/audio/victory-road.wav" />
+      </audio>
     </section>
     <main class="main-container">
       <form action=""></form>
     </main>
+
     <script src="js/main.js" type="module"></script>
   </body>
 </html>

@@ -6,13 +6,13 @@ export const MAX_QUESTIONS = 5;
 const fillPokeArrays = (arr) => {
   for (let i = 0; i < MAX_QUESTIONS; i++) {
     let pokeName = [];
-    let num = Math.ceil(Math.random() * 1000);
+    let num = Math.ceil(Math.random() * 151);
     if (num === 0) {
       num++;
     }
     pokeName.push(POKE_ENDPOINT + num);
     for (let j = 0; j < 3; j++) {
-      let num = Math.floor(Math.random() * 1000);
+      let num = Math.floor(Math.random() * 151);
       pokeName.push(POKE_ENDPOINT + num);
     }
     arr.push(pokeName);

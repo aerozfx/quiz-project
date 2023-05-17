@@ -1,10 +1,14 @@
 import { serverResponse, MAX_QUESTIONS } from "./fetch.js";
-
 // FUNCIONALIDAD .BUTTON-START
 const startButton = document.querySelector(".button-start");
 startButton.addEventListener("click", () => {
+  const audio = document.querySelector("#audio");
+  const start = new Audio("assets/audio/start.wav");
+  audio.pause();
+  start.play();
   const preLoadSection = document.querySelector(".pre-load");
   preLoadSection.classList.toggle("hide");
+  document.body.style.overflow = "unset";
 });
 // SELECTOR DEL FORMULARIO
 const formSelector = document.querySelector(".main-container form");
@@ -43,7 +47,6 @@ const createAnswers = (data, i) => {
   const article = document.createElement("article");
   article.className = "answer-article";
   article.innerHTML = ` 
-  <a href="#pregunta-${i + 1}">
   <input
   class="radio"
   type="radio"
@@ -51,11 +54,9 @@ const createAnswers = (data, i) => {
   name="question-${i}"
   id="${data.name}"
   />
-  
     <label class="answer-label" for="${data.name}">
     ${data.name}
-    </label>
-  </a>`;
+    </label>`;
   section[i].appendChild(article);
 };
 
@@ -104,10 +105,29 @@ const checkAnswers = (arr1, arr2) => {
 };
 
 const showResults = (num) => {
+  // Añadimos la regla overflow: hidden, para evitar el scroll vertical
+  document.body.style.overflow = "hidden";
   const darkBG = document.createElement("div");
-  darkBG.classList.toggle("modal");
+  darkBG.classList.add("modal");
   darkBG.style.top = `${window.scrollY}px`;
+  const result = document.createElement("div");
+  result.innerHTML = `      
+  <h2>TU RESULTADO ES:</h2>
+  <h4>${num}/${MAX_QUESTIONS}</h4>
+  <button class="button-reset">RESET</button>`;
+  result.classList.toggle("modal-result");
+  darkBG.appendChild(result);
   document.querySelector(".main-container").appendChild(darkBG);
+
+  if (num === MAX_QUESTIONS) {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+    let success = new Audio("assets/audio/success.wav");
+    success.play();
+  }
 };
 
 // CREA UNA PREGUNTA POR ARRAY DE 4 PROMESAS -> LA LONGITUD DEL ARRAY DEPENDERÁ DE LAS PREGUNTAS MÁXIMAS CONFIGURADAS
@@ -124,5 +144,7 @@ serverResponse.then(async (data) => {
     const anserws = getAnswers();
     const userInputs = getInputsByUser();
     showResults(checkAnswers(anserws, userInputs));
+    const buttonReset = document.querySelector(".button-reset");
+    buttonReset.addEventListener("click", () => formSelector.submit());
   });
 });
